@@ -1,3 +1,5 @@
+
+const fs = require("fs");
 const puppeteer = require("puppeteer");
 
 (async () => {
@@ -14,7 +16,10 @@ const puppeteer = require("puppeteer");
       () => Array.from(document.querySelectorAll("table.inzeraty"))
         .map(offer => ({
           title: offer.querySelector('span.nadpis > a').innerText.trim(),
-          price: offer.querySelector('span.cena > b').innerText.trim()
+          price: offer.querySelector('span.cena > b').innerText.trim(),
+          desc: offer.querySelector('div.popis').innerText.trim(),
+          location: offer.querySelector('tbody:nth-child(1) td:nth-child(3)').innerText.trim(),
+          link: offer.querySelector('span.nadpis > a').href
         }))
     );
 
@@ -37,9 +42,18 @@ const puppeteer = require("puppeteer");
   }
   const browser = await puppeteer.launch();
 
-  const url = "https://motorky.bazos.cz/skutry/0/";
+  const url = "https://motorky.bazos.cz/skutry/2460/";
   const offers = await getOffers(url)
   console.log(offers);
+
+  //Create json file with all the extracted data
+  fs.writeFile("./object.json", JSON.stringify(offers, null, 4), (err) => {
+    if (err) {
+        console.error(err);
+        return;
+    };
+    console.log("File has been created");
+  });
 
   await browser.close();
 })();
